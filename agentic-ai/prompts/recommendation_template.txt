@@ -1,0 +1,57 @@
+Analyze the following Kubernetes pod incident and provide actionable, prioritized recommendations.
+
+=== POD IDENTIFICATION ===
+Pod Name:  {pod_name}
+Namespace: {namespace}
+Timestamp: {timestamp}
+
+=== CURRENT METRICS ===
+CPU Usage:             {cpu_usage}%
+5-Minute Average:      {avg_cpu_5m}%
+15-Minute Average:     {avg_cpu_15m}%
+CPU Trend:             {cpu_trend}
+Throttling:            {throttling_percentage}%
+CPU Limit:             {cpu_limit} millicores
+CPU Request:           {cpu_request} millicores
+Restart Count:         {restart_count}
+Replica Count:         {replica_count}
+
+=== HEALTH ANALYSIS (Phase 5 Analyzer) ===
+Health Status:         {health_status}
+Severity:              {severity}
+Detected Abnormality:  {abnormality}
+Trend:                 {trend}
+Analyzer Confidence:   {analyzer_confidence}%
+Analyzer Reasoning:
+{analyzer_reasoning}
+
+=== ROOT CAUSE ANALYSIS (Phase 6) ===
+Root Cause:            {root_cause}
+Root Cause Confidence: {root_cause_confidence}%
+Source:                {root_cause_source}
+Evidence:
+{root_cause_evidence}
+Reasoning:
+{root_cause_reasoning}
+
+=== YOUR TASK ===
+Based ONLY on the context above:
+
+1. Provide the most important actionable recommendations (use enum values from the allowed list).
+2. Explain your reasoning step by step, referencing specific metric values.
+3. Include alternative recommendations with priority and confidence scores.
+4. Ensure recommendations are safe — never cause downtime, never delete resources.
+5. Order recommendations by priority (most critical first).
+6. If metrics are normal or improving, recommend MONITOR_CLOSELY or NO_ACTION_REQUIRED.
+
+DECISION GUIDELINES:
+- If root_cause = CPU_LIMIT_REACHED → INCREASE_CPU_LIMIT (HIGH), ENABLE_HPA (MEDIUM)
+- If root_cause = INSUFFICIENT_REPLICAS → SCALE_UP_REPLICAS (HIGH), ENABLE_HPA (HIGH)
+- If root_cause = POD_RESTARTING → RESTART_POD (HIGH), INVESTIGATE_APPLICATION (HIGH)
+- If root_cause = WORKLOAD_SPIKE → ENABLE_HPA (HIGH), SCALE_UP_REPLICAS (MEDIUM)
+- If root_cause = RESOURCE_REQUEST_TOO_LOW → INCREASE_CPU_REQUEST (HIGH), REVIEW_DEPLOYMENT (MEDIUM)
+- If root_cause = NODE_RESOURCE_CONTENTION → CHECK_NODE_UTILIZATION (HIGH), REVIEW_DEPLOYMENT (MEDIUM)
+- If root_cause = APPLICATION_BUG → INVESTIGATE_APPLICATION (HIGH), MONITOR_CLOSELY (MEDIUM)
+- If root_cause = UNKNOWN → MONITOR_CLOSELY (HIGH), REVIEW_DEPLOYMENT (LOW)
+
+Return ONLY the JSON object. No other text.

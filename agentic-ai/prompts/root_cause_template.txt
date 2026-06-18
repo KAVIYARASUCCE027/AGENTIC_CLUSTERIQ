@@ -1,0 +1,44 @@
+Analyze the following Kubernetes pod CPU metrics and identify the most probable root cause.
+
+=== POD IDENTIFICATION ===
+Pod Name:  {pod_name}
+Namespace: {namespace}
+Severity:  {severity}
+Detected Abnormality: {abnormality}
+
+=== CPU METRICS ===
+Current CPU Usage:     {current_cpu_usage}%
+5-Minute Average:      {avg_cpu_5m}%
+15-Minute Average:     {avg_cpu_15m}%
+CPU Trend:             {cpu_trend}
+Throttling:            {throttling_percentage}%
+CPU Limit:             {cpu_limit} millicores
+CPU Request:           {cpu_request} millicores
+
+=== RESTART METRICS ===
+Restart Count:         {restart_count}
+
+=== REPLICA METRICS ===
+Current Replicas:      {current_replicas}
+
+=== PHASE 5 ANALYZER REASONING ===
+{analyzer_reasoning}
+
+=== YOUR TASK ===
+Based ONLY on the metrics above:
+
+1. Identify the single most probable root cause from the allowed list.
+2. Cite specific metric values as evidence (use actual numbers from the input).
+3. Explain your logical reasoning step by step.
+4. List 2–3 alternative possible causes with their confidence scores.
+5. Assign a confidence score (0–100) reflecting metric support strength.
+
+IMPORTANT GUIDELINES:
+- If CPU usage is high (>90%) AND 5m average is low (<50%), this is a WORKLOAD_SPIKE.
+- If CPU usage is high AND 5m/15m averages are also high, this is SUSTAINED and may indicate CPU_LIMIT_REACHED or INSUFFICIENT_REPLICAS.
+- If restart_count > 3, weight POD_RESTARTING heavily.
+- If replica_count == 1 AND CPU > 85%, weight INSUFFICIENT_REPLICAS.
+- If cpu_limit > 0 AND usage approaches limit, weight CPU_LIMIT_REACHED.
+- If metrics are ambiguous, choose UNKNOWN with low confidence.
+
+Return ONLY the JSON object. No other text.

@@ -1,0 +1,46 @@
+Analyze the following Kubernetes pod incident and generate a step-by-step action plan.
+
+=== POD IDENTIFICATION ===
+Pod Name:  {pod_name}
+Namespace: {namespace}
+Timestamp: {timestamp}
+
+=== CURRENT METRICS ===
+CPU Usage:             {cpu_usage}%
+5-Minute Average:      {avg_cpu_5m}%
+15-Minute Average:     {avg_cpu_15m}%
+CPU Trend:             {cpu_trend}
+Throttling:            {throttling_percentage}%
+CPU Limit:             {cpu_limit} millicores
+CPU Request:           {cpu_request} millicores
+Restart Count:         {restart_count}
+Replica Count:         {replica_count}
+
+=== HEALTH ANALYSIS ===
+Health Status:         {health_status}
+Severity:              {severity}
+Detected Abnormality:  {abnormality}
+Trend:                 {trend}
+
+=== ROOT CAUSE ANALYSIS ===
+Root Cause:            {root_cause}
+Evidence:
+{root_cause_evidence}
+
+=== SRE RECOMMENDATIONS (Phase 7) ===
+Recommendations:
+{recommendations}
+Reasoning:
+{recommendation_reasoning}
+
+=== YOUR TASK ===
+Based ONLY on the context above, construct a detailed operational runbook for engineers.
+
+1. Translate the given Recommendations into discrete executable steps.
+2. If the recommendation is "INCREASE_CPU_LIMIT", provide a PATCH_DEPLOYMENT step to adjust limits.
+3. If the recommendation is "SCALE_UP_REPLICAS", provide a KUBECTL_COMMAND step to scale.
+4. Ensure the `action_type` matches the intended operation.
+5. Assess the overall priority and risk.
+6. Provide a clear rollback strategy.
+
+Return ONLY the JSON object. No other text.
