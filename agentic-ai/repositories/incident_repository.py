@@ -1,45 +1,81 @@
-"""
-Incident Repository — Phase 9.
+import logging
+from typing import List, Optional
+from database.mongo_client import get_db
+from schemas.incident_schema import IncidentSchema
+from schemas.incident_history_schema import IncidentHistorySchema
+from schemas.enums.incident_status import IncidentStatus
+from schemas.enums.incident_severity import IncidentSeverity
+from datetime import datetime, timezone
 
-CRUD operations for the cpu_incidents collection.
-"""
-from typing import Optional, List, Dict, Any
-from pymongo import DESCENDING
-
-from database.collections import get_cpu_incidents_collection
-from schemas.memory.incident_record import IncidentRecord
-
+logger = logging.getLogger(__name__)
 
 class IncidentRepository:
     def __init__(self):
-        self._col = get_cpu_incidents_collection()
+        self._db = get_db()
+        self._incidents = self._db["incidents"]
+        self._history = self._db["incident_history"]
 
-    def save(self, record: IncidentRecord) -> str:
-        """Insert a new incident record."""
-        doc = record.model_dump(by_alias=True)
-        # Ensure enums are converted to strings if pydantic didn't fully handle it,
-        # but model_dump(mode='json') or just model_dump usually does fine for basic enums.
-        # Let's use mode='json' to be safe with datetime and enums.
-        doc_json = record.model_dump(mode="json", by_alias=True)
-        self._col.insert_one(doc_json)
-        return doc_json["_id"]
+    def save_incident(self, incident: IncidentSchema) -> IncidentSchema:
+        doc = incident.model_dump()
+        self._incidents.update_one(
+            {"incident_id": incident.incident_id},
+            {"$set": doc},
+            upsert=True
+        )
+        return incident
 
-    def find_by_id(self, incident_id: str) -> Optional[IncidentRecord]:
-        """Find a record by its business ID."""
-        doc = self._col.find_one({"incident_id": incident_id})
+    def find_by_id(self, incident_id: str) -> Optional[IncidentSchema]:
+        doc = self._incidents.find_one({"incident_id": incident_id})
         if doc:
-            return IncidentRecord(**doc)
+            doc.pop("_id", None)
+            return IncidentSchema(**doc)
         return None
 
-    def list_recent(self, limit: int = 10) -> List[IncidentRecord]:
-        """List the most recent incidents globally."""
-        cursor = self._col.find().sort("timestamp", DESCENDING).limit(limit)
-        return [IncidentRecord(**doc) for doc in cursor]
+    def find_open_incidents(self) -> List[IncidentSchema]:
+        docs = self._incidents.find({"status": IncidentStatus.OPEN.value})
+        results = []
+        for doc in docs:
+            doc.pop("_id", None)
+            results.append(IncidentSchema(**doc))
+        return results
 
-    def archive(self, incident_id: str) -> bool:
-        """Mark an incident as archived."""
-        result = self._col.update_one(
+    def find_resolved_incidents(self) -> List[IncidentSchema]:
+        docs = self._incidents.find({"status": IncidentStatus.RESOLVED.value})
+        results = []
+        for doc in docs:
+            doc.pop("_id", None)
+            results.append(IncidentSchema(**doc))
+        return results
+
+    def update_status(self, incident_id: str, status: IncidentStatus) -> bool:
+        result = self._incidents.update_one(
             {"incident_id": incident_id},
-            {"$set": {"status": "ARCHIVED"}}
+            {"$set": {
+                "status": status.value,
+                "updated_at": datetime.now(timezone.utc)
+            }}
         )
         return result.modified_count > 0
+
+    def update_severity(self, incident_id: str, severity: IncidentSeverity) -> bool:
+        result = self._incidents.update_one(
+            {"incident_id": incident_id},
+            {"$set": {
+                "severity": severity.value,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+        return result.modified_count > 0
+
+    def save_history(self, history: IncidentHistorySchema) -> IncidentHistorySchema:
+        doc = history.model_dump()
+        self._history.insert_one(doc)
+        return history
+
+    def find_history(self, incident_id: str) -> List[IncidentHistorySchema]:
+        docs = self._history.find({"incident_id": incident_id}).sort("changed_at", 1)
+        results = []
+        for doc in docs:
+            doc.pop("_id", None)
+            results.append(IncidentHistorySchema(**doc))
+        return results

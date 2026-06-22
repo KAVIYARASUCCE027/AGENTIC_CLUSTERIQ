@@ -24,6 +24,7 @@ def initialize_registry():
     from agents.log_agent import LogAgent
     from agents.k8s_event_agent import K8sEventAgent
     from agents.executor_agent import ExecutorAgent
+    from agents.incident_agent.incident_agent import IncidentAgent
 
     agent_registry.register(CorrelationAgent())
     agent_registry.register(AnalyzerAgent())
@@ -37,5 +38,6 @@ def initialize_registry():
     agent_registry.register(LogAgent())
     agent_registry.register(K8sEventAgent())
     agent_registry.register(ExecutorAgent())
+    agent_registry.register(IncidentAgent())
     
     logger.info("Agent Registry initialized successfully.")

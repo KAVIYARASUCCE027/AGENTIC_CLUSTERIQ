@@ -45,6 +45,7 @@ from schemas.knowledge.knowledge_output import KnowledgeAgentOutput
 from schemas.correlation.correlation_output import CorrelationOutput
 from schemas.approval.approval_output import ApprovalOutputState
 from schemas.approval.execution_output import ExecutionOutputState
+from schemas.incident_output import IncidentOutput
 
 logger = logging.getLogger(__name__)
 
@@ -316,9 +317,14 @@ class CPUState(BaseModel):
         description="CPU utilisation metrics from the monitoring stack.",
     )
 
-    memory_output: Optional[MemoryOutputState] = Field(
+    correlation_output: Optional[CorrelationOutput] = Field(
         default=None,
-        description="Results from the memory/correlation agent.",
+        description="Event correlation results including related events and macro-incident type.",
+    )
+    
+    incident_output: Optional[IncidentOutput] = Field(
+        default=None,
+        description="Incident details including ID, status, and severity.",
     )
     
     approval_output: Optional[ApprovalOutputState] = Field(

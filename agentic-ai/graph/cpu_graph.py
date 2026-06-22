@@ -13,6 +13,7 @@ from schemas.cpu_state import CPUState
 from nodes.cpu.metric_collector_node import metric_collector
 from nodes.cpu.correlation_node import correlation_node
 from nodes.cpu.analyzer_node import analyzer_node
+from nodes.cpu.incident_node import incident_node
 from nodes.cpu.root_cause_node import root_cause_node
 from nodes.cpu.knowledge_node import knowledge_node
 from nodes.cpu.recommendation_node import recommendation_node
@@ -59,6 +60,7 @@ def build_cpu_graph() -> StateGraph:
     # 2. Add nodes
     graph_builder.add_node("metric_collector", metric_collector)
     graph_builder.add_node("correlation", correlation_node)       # Phase 12
+    graph_builder.add_node("incident", incident_node)             # Phase 19
     graph_builder.add_node("analyzer", analyzer_node)
     graph_builder.add_node("root_cause", root_cause_node)
     graph_builder.add_node("knowledge", knowledge_node)
@@ -71,7 +73,8 @@ def build_cpu_graph() -> StateGraph:
     # 3. Define the edges (workflow)
     graph_builder.add_edge(START, "metric_collector")
     graph_builder.add_edge("metric_collector", "correlation")     # Phase 12
-    graph_builder.add_edge("correlation", "analyzer")             # Phase 12
+    graph_builder.add_edge("correlation", "incident")             # Phase 19
+    graph_builder.add_edge("incident", "analyzer")                # Phase 19
     graph_builder.add_edge("analyzer", "root_cause")
     graph_builder.add_edge("root_cause", "knowledge")
     graph_builder.add_edge("knowledge", "recommendation")
